@@ -195,7 +195,7 @@ return worldFrame(won?cinematicRoom(r.i,'dan'):cinematicRoom(r.i,'judge'),won?'w
 function courtroom(){
 const c=cases[r.i],last=r.i===cases.length-1;
 const phase=({intro:'Client',evidence:'Investigate',trial:'Trial',argument:'Argument',won:'Verdict',lost:'Verdict'})[r.phase];
-let out='<div class="world-top">'+button('docket','← Docket','link')+'<small> '+esc(phase)+' '+(r.phase==='trial'?(r.q+1)+'/'+c[7].length:r.phase==='intro'?(r.talk+1)+'/4':'')+'</small><small>v21</small></div><div class="world-title"><small>'+esc(c[0])+'</small><h2>'+esc(c[1])+'</h2></div>';
+let out='<div class="world-top">'+button('docket','← Docket','link')+'<small> '+esc(phase)+' '+(r.phase==='trial'?(r.q+1)+'/'+c[7].length:r.phase==='intro'?(r.talk+1)+'/4':'')+'</small><small>v22</small></div><div class="world-title"><small>'+esc(c[0])+'</small><h2>'+esc(c[1])+'</h2></div>';
 return out+(r.phase==='intro'?worldInterview(c):r.phase==='evidence'?worldExplore(c):r.phase==='trial'?worldTrial(c):r.phase==='argument'?worldArgument(c):worldVerdict(c,last)+(globalThis.danBabyFlash?.()||''))
 }
 function start(i){if(!Number.isInteger(i)||i<0||i>=cases.length||!open(i))return;const order=[0,1,2];for(let j=2;j>0;j--){const k=Math.floor(Math.random()*(j+1));[order[j],order[k]]=[order[k],order[j]]}r={i,phase:'intro',q:0,hp:3,feedback:'',pressed:false,first:false,unlock:'',inspect:null,order,talk:0,location:'scene',found:[],exploreLine:'',reaction:null,position:[16,84],walkFrom:[16,84],arrival:false};mode='court';window.scrollTo(0,0)}
