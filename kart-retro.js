@@ -45,6 +45,9 @@ function trackTexture(t,at){
    if(nearest<29)continue;
    props.push({x:a.x,y:a.y,kind:j%5===0?'sign':p.kind,variant:j%3});
  }
+ // Signature landmarks occupy the same interior region as the course map.
+ const landmark={country:{x:183,y:161,kind:'pond'},court:{x:187,y:215,kind:'bench'},spain:{x:181,y:192,kind:'villa'},bath:{x:188,y:219,kind:'baby'},space:{x:184,y:215,kind:'planet'}}[t.decor];
+ if(landmark)props.push({...landmark,variant:0});
  const a={map,props,p};cache.set(t,a);return a
 }
 function skyline(c,t,p,heading){
@@ -86,6 +89,11 @@ function scenery(c,q,kind,variant){
  const dark='#473b32';
  rect(c,-11,-2,22,3,'#554d3e66');
  if(kind==='tree'){rect(c,-2,-18,5,18,'#936b47');poly(c,[[-14,-16],[-14,-28],[-8,-36],[7,-36],[14,-29],[14,-16]],'#426a38');poly(c,[[-11,-19],[-10,-28],[-4,-33],[7,-33],[11,-26],[8,-18]],'#79ae53');rect(c,-9,-28,8,4,'#a0c96a')}
+ else if(kind==='pond'){poly(c,[[-25,1],[-28,-5],[-19,-13],[16,-13],[28,-5],[25,1]],'#6599ae');poly(c,[[-19,-4],[-12,-9],[13,-9],[20,-4]],'#92c4cc');rect(c,-10,-7,12,1,'#d5e9df')}
+ else if(kind==='bench'){rect(c,-23,-22,46,22,'#704e35');rect(c,-21,-19,42,16,'#b78858');rect(c,-25,-26,50,5,'#e0b67c');rect(c,-10,-16,20,6,'#fff0ce');rect(c,-5,-37,10,11,'#a69a8e');rect(c,-7,-35,14,5,'#e7ddc7')}
+ else if(kind==='villa'){rect(c,-23,-28,46,28,'#fff0ce');poly(c,[[-27,-28],[0,-45],[27,-28]],'#b75f40');rect(c,-15,-21,10,11,'#91bbc4');rect(c,5,-21,10,11,'#91bbc4');rect(c,-4,-13,9,13,'#986846')}
+ else if(kind==='baby'){rect(c,-29,-6,58,7,'#718e82');rect(c,-27,-26,54,24,'#e6ecdb');rect(c,-24,-25,48,16,'#a5b9aa');poly(c,[[-22,-13],[-24,-30],[-16,-43],[15,-43],[24,-31],[25,-13]],'#60676b');poly(c,[[-20,-15],[-21,-31],[-14,-40],[14,-40],[21,-29],[22,-15]],'#9da5ad');poly(c,[[-16,-38],[-17,-49],[-7,-41]],'#9da5ad');poly(c,[[16,-38],[17,-49],[7,-41]],'#9da5ad');rect(c,-14,-24,28,10,'#f2ebdc');line(c,[[-12,-32],[-8,-29],[-4,-32]],'#473b32',2);line(c,[[4,-32],[8,-29],[12,-32]],'#473b32',2);rect(c,-2,-25,4,2,'#c89197');rect(c,-28,-12,56,9,'#d5e0d4');rect(c,-25,-11,50,2,'#f5f4e8')}
+ else if(kind==='planet'){poly(c,[[-23,-23],[-20,-42],[-8,-51],[11,-51],[24,-38],[24,-22],[12,-12],[-9,-12]],'#b39bcf');poly(c,[[-17,-36],[-8,-45],[7,-45],[17,-36]],'#d2b3d8');line(c,[[-34,-20],[33,-43]],'#f1d9aa',5);rect(c,-10,-30,7,5,'#8b72a7')}
  else if(kind==='pillar'){rect(c,-10,-30,20,30,'#a47a55');rect(c,-7,-29,14,26,'#f4e0b8');rect(c,-6,-28,3,25,'#e6c392');rect(c,-13,-34,26,5,'#b28a60');rect(c,-12,-4,24,5,'#b28a60')}
  else if(kind==='house'){rect(c,-13,-21,26,21,'#fff0ce');poly(c,[[-16,-21],[0,-35],[16,-21]],'#a84a31');rect(c,-7,-15,6,8,'#84b5c4');rect(c,5,-15,5,8,'#84b5c4');rect(c,-3,-10,7,10,'#966345')}
  else if(kind==='soap'){rect(c,-13,-13,26,13,'#607f73');rect(c,-12,-15,24,13,variant===1?'#e6b3b2':'#ecedcf');rect(c,-9,-12,18,2,'#fff4d8')}
