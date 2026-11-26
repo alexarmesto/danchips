@@ -3,9 +3,9 @@
 const URL='https://gosjseehlrdalasaoomf.supabase.co',KEY='sb_publishable_JYeB8bY1-_k9Aejq3Qrgtg_sKqOyJTj';
 const db=globalThis.supabase?.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let user=null,me=null,players=[],relations=[],mode='global',notice='',busy=false,ready=false,channel=null,refreshTimer,saveTimer,dirty=false,refreshing=false,again=false,epoch=0;
-const fields=['crumbs','xp','fed','owned','selected','outfit','lesson','learned','read'];
+const fields=['crumbs','xp','fed','owned','selected','outfit','lesson','learned','read','courtWins'];
 const snapshot=()=>Object.fromEntries(fields.map(k=>[k,s[k]]));
-const valid=p=>p&&Number.isSafeInteger(p.fed)&&p.fed>=0&&Number.isSafeInteger(p.xp)&&p.xp>=0&&Number.isSafeInteger(p.crumbs)&&p.crumbs>=0&&Array.isArray(p.owned)&&p.owned.includes(0)&&p.owned.every(n=>Number.isInteger(n)&&n>=0&&n<chips.length)&&p.owned.includes(p.selected)&&Number.isInteger(p.outfit)&&p.outfit>=0&&p.outfit<outfits.length&&Number.isInteger(p.lesson)&&p.lesson>=0&&p.lesson<lessons.length&&Array.isArray(p.learned)&&p.learned.every(n=>Number.isInteger(n)&&n>=0&&n<lessons.length)&&Array.isArray(p.read)&&p.read.every(n=>Number.isInteger(n)&&n>=0&&n<chapters.length);
+const valid=p=>p&&Number.isSafeInteger(p.fed)&&p.fed>=0&&Number.isSafeInteger(p.xp)&&p.xp>=0&&Number.isSafeInteger(p.crumbs)&&p.crumbs>=0&&Array.isArray(p.owned)&&p.owned.includes(0)&&p.owned.every(n=>Number.isInteger(n)&&n>=0&&n<chips.length)&&p.owned.includes(p.selected)&&Number.isInteger(p.outfit)&&p.outfit>=0&&p.outfit<outfits.length&&Number.isInteger(p.lesson)&&p.lesson>=0&&p.lesson<lessons.length&&Array.isArray(p.learned)&&p.learned.every(n=>Number.isInteger(n)&&n>=0&&n<lessons.length)&&Array.isArray(p.read)&&p.read.every(n=>Number.isInteger(n)&&n>=0&&n<chapters.length)&&(p.courtWins===undefined||(Array.isArray(p.courtWins)&&p.courtWins.length<=13&&new Set(p.courtWins).size===p.courtWins.length&&p.courtWins.every(n=>Number.isInteger(n)&&n>=0&&n<13)));
 const refreshUI=()=>{if(tab===5&&!document.querySelector('main input:focus'))render()};
 const say=t=>{notice=t;refreshUI()};
 const action=(a,label,cls='secondary')=>'<button class="'+cls+'" data-online="'+a+'" '+(busy?'disabled':'')+'>'+label+'</button>';
@@ -56,7 +56,7 @@ const p=check(await db.from('chip_players').select('id,username,chips').eq('id',
 const cloud=check(await db.from('chip_saves').select('progress').eq('id',u.id).maybeSingle());
 if(token!==epoch)return;
 const previous=s.cloudOwner;
-if(cloud&&valid(cloud.progress)){if(previous!==u.id||cloud.progress.fed>=s.fed){Object.assign(s,cloud.progress)}}
+if(cloud&&valid(cloud.progress)){if(previous!==u.id||cloud.progress.fed>=s.fed){Object.assign(s,{courtWins:[]},cloud.progress)}}
 else if(previous&&previous!==u.id){for(const k of fields)s[k]=Array.isArray(defaults[k])?[...defaults[k]]:defaults[k]}
 s.cloudOwner=u.id;originalSave();me=p;
 if(me){dirty=true;await flush();if(token!==epoch)return;channel=db.channel('dan-chip-club-'+u.id).on('postgres_changes',{event:'*',schema:'public',table:'chip_players'},schedule).on('postgres_changes',{event:'*',schema:'public',table:'chip_friendships'},schedule).subscribe();await refresh()}
