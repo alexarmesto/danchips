@@ -162,7 +162,7 @@ return '<div class="world-evidence-desk"><div class="world-desk-label">'+(explor
 function worldInspect(c){
 if(r.inspect===null||r.inspect===undefined)return '';
 const j=r.inspect,[name,body]=c[6][j].split('|'),letter=String.fromCharCode(65+r.order.indexOf(j));
-return '<div class="world-inspect '+(r.arrival?'world-arrival':'')+'" role="dialog" aria-label="Exhibit '+letter+'"><div class="world-inspect-object"><button class="world-close" data-court="inspectclose" aria-label="Return to scene">✕</button><small>EXHIBIT '+letter+'</small>'+evidenceArt(r.i,j)+'<strong>'+esc(name)+'</strong><div class="world-evidence-caption">'+esc(body)+'</div><div class="world-inspect-actions">'+(r.phase==='trial'?button('object:'+j,'OBJECTION!','world-objection')+button('inspectclose','Put back','world-action subtle'):button('inspectclose','Put in satchel →','world-action'))+'</div></div></div>'
+return '<div class="world-inspect '+(r.arrival?'world-arrival':'')+'" role="dialog" aria-label="Exhibit '+letter+'"><div class="world-inspect-object"><button class="world-close" data-court="inspectclose" aria-label="Return to scene">✕</button><small>EXHIBIT '+letter+'</small>'+evidenceArt(r.i,j)+'<strong>'+esc(name)+'</strong><div class="world-evidence-caption">'+esc(body)+'</div>'+(r.phase==='trial'?'<div class="world-compare"><small>WITNESS SAID</small><p>“'+esc(c[7][r.q])+'”</p></div>':'')+'<div class="world-inspect-actions">'+(r.phase==='trial'?button('object:'+j,'OBJECTION!','world-objection')+button('inspectclose','Put back','world-action subtle'):button('inspectclose','Put in satchel →','world-action'))+'</div></div></div>'
 }
 function worldReaction(c){
 const ok=r.reaction.ok,who=ok?'dan':'judge';
