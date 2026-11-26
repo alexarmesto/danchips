@@ -38,6 +38,17 @@ out+='<div class="panel"><h3>Incoming requests · '+incoming.length+'</h3>'+(inc
 return out+'<div class="toast" aria-live="polite">'+esc(notice)+'</div><p class="muted">Cloud saves sync while signed in. Your account data is protected by database access rules.</p>'
 }
 globalThis.danOnlineSocial=onlineSocial;
+globalThis.danKartPublish=async(track,time_ms,finish_place,car)=>{
+if(!db||!user||!me)return {status:'offline'};
+try{const player_id=user.id,p={player_id,track,time_ms,finish_place,car};
+check(await db.from('chip_kart_records').upsert(p,{onConflict:'player_id,track',ignoreDuplicates:true}));
+check(await db.from('chip_kart_records').update({time_ms,finish_place,car,updated_at:new Date().toISOString()}).eq('player_id',player_id).eq('track',track).gt('time_ms',time_ms));
+return {status:'ok'}}catch(e){return {status:'error'}}
+};
+globalThis.danKartBoard=async(track)=>{
+if(!db||!user||!me)return {status:'offline',rows:[]};
+try{const rows=check(await db.from('chip_kart_records').select('time_ms,finish_place,car,chip_players(username)').eq('track',track).order('time_ms',{ascending:true}).limit(20));return {status:'ok',rows:rows||[]}}catch(e){return {status:'error',rows:[]}}
+};
 async function refresh(){
 if(!db||!user||!me)return;if(refreshing){again=true;return}refreshing=true;const token=epoch;
 try{
