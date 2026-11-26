@@ -5,7 +5,7 @@ const wins=()=>Array.isArray(s.courtWins)?s.courtWins:[];
 const open=i=>i<cases.length-1||cases.slice(0,-1).every((_,j)=>wins().includes(j));
 const button=(a,label,cls='primary')=>'<button class="'+cls+'" data-court="'+a+'">'+label+'</button>';
 const card=(a)=>'<div class="panel">'+a+'</div>';
-const menu=()=>head('Dan’s Arcade','Choose your pursuit of the crunch.')+card('<div style="font-size:36px">🕹️</div><h2>Flappy Chip</h2><p>Fly in your equipped outfit and eat chips.</p>'+button('flap','Play Flappy Chip'))+card('<div style="font-size:36px">⚖️</div><h2>Dan: Attorney at Chip</h2><p>Defend spectacularly absurd clients. '+wins().length+'/'+cases.length+' cases won.</p>'+button('docket','Enter the courtroom'));
+const menu=()=>head('Dan’s Arcade','Choose your pursuit of the crunch.')+card('<div style="font-size:36px">🕹️</div><h2>Flappy Chip</h2><p>Fly in your equipped outfit and eat chips.</p>'+button('flap','Play Flappy Chip'))+card('<div style="font-size:36px">⚖️</div><h2>Dan: Attorney at Chip</h2><p>Defend spectacularly absurd clients. '+wins().length+'/'+cases.length+' cases won.</p>'+button('docket','Enter the courtroom'))+card('<div style="font-size:36px">🐈</div><small>CASE #001 · UNSOLVED</small><h2>The Unsolved Case of Baby</h2><p>Dan’s recurring nightmare. A cat of impossible proportions.</p>'+button('baby','Enter the nightmare'));
 const docket=()=>button('menu','← Arcade','link')+head('Dan: Attorney at Chip','A very serious beetle. Extremely unserious clients.')+card('<div class="split"><strong>Case docket</strong><span class="tag">'+wins().length+'/'+cases.length+' won</span></div>'+progress(wins().length/cases.length*100)+'<p class="muted">First wins earn 12 crumbs + 5 XP. Finale: 50 crumbs + 15 XP. Win 4, 8 and 13 cases to unlock courtroom cosmetics.</p>')+cases.map((c,i)=>'<button class="chapter" data-court="start:'+i+'" '+(!open(i)?'disabled':'')+'><span class="symbol">'+(!open(i)?'🔒':c[5])+'</span><span><small>'+esc(c[0])+'</small><strong>'+esc(c[1])+'</strong><span class="muted">'+(!open(i)?'Win all 12 cases first':wins().includes(i)?'Won · Replay':'New case')+'</span></span><span class="end">'+(wins().includes(i)?'✓':'›')+'</span></button>').join('')+'<p class="muted">Fictional comedy, not legal advice.</p>';
 
 const palette=['#df9550','#86b59c','#aa97d4','#e3bb60','#e9a66f','#8bb7d0','#d3af82','#98c17d','#ad93d5','#e6a0a2','#8db5a3','#e6b34c','#8ab67e'];
@@ -196,12 +196,12 @@ function courtroom(){
 const c=cases[r.i],last=r.i===cases.length-1;
 const phase=({intro:'Client',evidence:'Investigate',trial:'Trial',argument:'Argument',won:'Verdict',lost:'Verdict'})[r.phase];
 let out='<div class="world-top">'+button('docket','← Docket','link')+'<small> '+esc(phase)+' '+(r.phase==='trial'?(r.q+1)+'/'+c[7].length:r.phase==='intro'?(r.talk+1)+'/4':'')+'</small><small>v15</small></div><div class="world-title"><small>'+esc(c[0])+'</small><h2>'+esc(c[1])+'</h2></div>';
-return out+(r.phase==='intro'?worldInterview(c):r.phase==='evidence'?worldExplore(c):r.phase==='trial'?worldTrial(c):r.phase==='argument'?worldArgument(c):worldVerdict(c,last))
+return out+(r.phase==='intro'?worldInterview(c):r.phase==='evidence'?worldExplore(c):r.phase==='trial'?worldTrial(c):r.phase==='argument'?worldArgument(c):worldVerdict(c,last)+(globalThis.danBabyFlash?.()||''))
 }
 function start(i){if(!Number.isInteger(i)||i<0||i>=cases.length||!open(i))return;const order=[0,1,2];for(let j=2;j>0;j--){const k=Math.floor(Math.random()*(j+1));[order[j],order[k]]=[order[k],order[j]]}r={i,phase:'intro',q:0,hp:3,feedback:'',pressed:false,first:false,unlock:'',inspect:null,order,talk:0,location:'scene',found:[],exploreLine:'',reaction:null,position:[16,84],walkFrom:[16,84],arrival:false};mode='court';window.scrollTo(0,0)}
-function miss(msg){r.hp--;r.feedback=msg;if(r.hp===0)r.phase='lost'}
+function miss(msg){r.hp--;r.feedback=msg;if(r.hp===0){r.phase='lost';globalThis.danBabyTrigger?.('loss')}}
 function act(a){const [cmd,arg]=a.split(':');const i=Number(arg);
-if(cmd==='menu'||cmd==='docket'||cmd==='flap'){flapStop();flapRun=null;r=null;mode=cmd;window.scrollTo(0,0)}
+if(cmd==='baby'){flapStop();flapRun=null;r=null;mode='baby';render();return}if(cmd==='menu'||cmd==='docket'||cmd==='flap'){flapStop();flapRun=null;r=null;mode=cmd;window.scrollTo(0,0)}
 else if(cmd==='start')start(i);
 else if(r){const c=cases[r.i];if(cmd==='retry')start(r.i);
 else if(cmd==='talk'&&r.phase==='intro'){r.talk=Math.min(3,r.talk+1)}
@@ -217,10 +217,12 @@ else if(cmd==='press'&&r.phase==='trial'&&!r.reaction){r.pressed=true;r.feedback
 else if(cmd==='unpress'&&r.phase==='trial'){r.pressed=false}
 else if(cmd==='reaction'&&r.phase==='trial'&&r.reaction){let ok=r.reaction.ok;r.reaction=null;r.feedback='';r.pressed=false;if(ok){r.q++;if(r.q===c[7].length)r.phase='argument'}window.scrollTo(0,0)}
 else if(cmd==='object'&&r.phase==='trial'&&!r.reaction&&r.found.includes(i)){r.inspect=null;if(i!==r.q){miss('Objection overruled! That exhibit does not directly contradict the witness.');if(r.phase==='trial')r.reaction={ok:false}}else{r.reaction={ok:true,line:'Objection! '+c[6][i].split('|')[1]};r.feedback='OBJECTION SUSTAINED!'}window.scrollTo(0,0)}
-else if(cmd==='close'&&r.phase==='argument'){if(i!==c[9])miss('The judge wants evidence, not a snack-based theory.');else{r.phase='won';if(!wins().includes(r.i)){s.courtWins=[...wins(),r.i];r.first=true;s.crumbs+=r.i===cases.length-1?50:12;s.xp+=r.i===cases.length-1?15:5;r.unlock=({4:'Courtroom Dan',8:'Golden Objection Dan',13:'Supreme Court Dan'})[wins().length]||''}}}
+else if(cmd==='close'&&r.phase==='argument'){if(i!==c[9])miss('The judge wants evidence, not a snack-based theory.');else{r.phase='won';globalThis.danBabyTrigger?.('win');if(!wins().includes(r.i)){s.courtWins=[...wins(),r.i];r.first=true;s.crumbs+=r.i===cases.length-1?50:12;s.xp+=r.i===cases.length-1?15:5;r.unlock=({4:'Courtroom Dan',8:'Golden Objection Dan',13:'Supreme Court Dan'})[wins().length]||''}}}
 }save();render()}
 globalThis.danArcadeMode=()=>mode;
-globalThis.danArcadeView=()=>mode==='flap'?button('menu','← Arcade','link')+flapGame():mode==='docket'?docket():mode==='court'&&r?courtroom():menu();
+globalThis.danBabyEnter=()=>{flapStop();flapRun=null;r=null;tab=6;mode='baby';window.scrollTo(0,0)};
+globalThis.danBabyExit=()=>{mode='menu';window.scrollTo(0,0);render()};
+globalThis.danArcadeView=()=>mode==='baby'?(globalThis.danBabyView?.()||menu()):mode==='flap'?button('menu','← Arcade','link')+flapGame():mode==='docket'?docket():mode==='court'&&r?courtroom():menu();
 globalThis.danCourtHat=i=>({12:"<path d='M91 114L115 124L140 112L134 148H101Z' fill='#373945'/><path d='M105 119L115 128L126 119L126 132L115 139L105 132Z' fill='#fff7e3'/><path d='M79 40H144L138 17H91Z' fill='#373945'/>",13:"<path d='M88 118L113 130L139 118L137 146H96Z' fill='#713b2e'/><circle cx='114' cy='131' r='14' fill='#eab94e'/><path d='M107 130L113 137L122 124' fill='none' stroke='#fff2c8'/>",14:"<path d='M82 39L77 15L98 25L112 5L129 25L148 15L140 39Z' fill='#efc353'/><path d='M91 116L115 128L143 114L139 148H96Z' fill='#303040'/><path d='M107 121L115 129L125 121L126 138H105Z' fill='#fff7e3'/>"})[i]||'';
 root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;if(b.dataset.court!==undefined){e.preventDefault();e.stopImmediatePropagation();act(b.dataset.court)}else if(b.dataset.tab==='6'){flapStop();flapRun=null;r=null;mode='menu'}},true);
 render();
