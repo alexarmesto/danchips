@@ -36,32 +36,33 @@ function horizon(f){const [name,sky,grass,dirt,fence,kind]=fields[f];let h='<rec
 }
 function battingScene(){if(g.half===0)return pitchingScene();const f=fields[field],batting=true,bat=currentBatter(),pit=currentPitcher(),team=0;
  let a=horizon(field)+'<path d="M180 94L338 160L180 259L22 160Z" fill="'+f[3]+'"/><path d="M180 106L293 160L180 227L67 160Z" fill="'+f[2]+'"/><path d="M180 259L22 160L0 145M180 259L338 160L360 145" fill="none" stroke="#fff7df" stroke-width="2.8"/><ellipse cx="180" cy="153" rx="32" ry="12" fill="'+f[3]+'" stroke="#b58b5b" stroke-width="1"/><path d="M173 155H187" stroke="#fff4d8" stroke-width="3"/>';
- const defense=team===0?g.cpu:g.team;
- [[58,116,.42],[302,116,.42],[180,99,.36],[102,154,.5],[258,154,.5]].forEach((p,i)=>a+=person(defense[(i+1)%6],...p,1-team));
+ const defense=defensiveLineup();
+ [[58,116,.42],[302,116,.42],[180,99,.36],[102,154,.5],[258,154,.5]].forEach((p,i)=>a+=person(defense[i],...p,1-team));
  a+='<path d="M172 229H188L193 235L180 243L167 235Z" fill="#fff4dd" stroke="#94704b" stroke-width="1.5"/><path d="M106 212H154V252H106ZM206 212H254V252H206Z" fill="none" stroke="#fff7df" stroke-width="1.8"/>';
  for(let i=0;i<3;i++)if(g.bases[i]!==null){const pos=[[302,163,.55],[180,107,.4],[59,163,.55]][i];a+=person(g.bases[i],...pos,team)}
  a+=person(pit,180,155,.74,1-team,'pitch')+person(bat,125,244,1.48,team,'bat');
- a+='<g id="baseZone" fill="none" stroke="#fff4ab" stroke-width="2.6" stroke-dasharray="7 4"><rect x="165" y="185" width="34" height="38" rx="2"/></g><g id="baseBall" transform="translate(180 135) scale(.6)" opacity="0">'+ball(0,0,5)+'</g><text x="12" y="14" font-weight="900" font-size="10" fill="#fff9e7" stroke="#38543d" stroke-width="3" paint-order="stroke">'+(batting?'AT BAT':'ON THE MOUND')+'</text>';
+ a+='<g id="baseZone" fill="none" stroke="#fff4ab" stroke-width="2.6" stroke-dasharray="7 4"><rect x="153" y="180" width="54" height="48" rx="2"/></g><g id="baseBall" transform="translate(180 135) scale(.6)" opacity="0">'+ball(0,0,5)+'</g><text x="12" y="14" font-weight="900" font-size="10" fill="#fff9e7" stroke="#38543d" stroke-width="3" paint-order="stroke">'+(batting?'AT BAT':'ON THE MOUND')+'</text>';
  return svg(a,'Backyard baseball field, batter at home plate and pitcher in distance')
 }
 function pitchingScene(){
  const f=fields[field];let a=horizon(field)+'<path d="M180 109L336 183L180 260L24 183Z" fill="'+f[3]+'"/><path d="M180 118L291 183L180 236L69 183Z" fill="'+f[2]+'"/><path d="M180 109L24 183M180 109L336 183" stroke="#fff7df" stroke-width="2.5" fill="none"/><ellipse cx="180" cy="219" rx="42" ry="16" fill="'+f[3]+'" stroke="#b58b5b"/><path d="M172 220H188" stroke="#fff4d8" stroke-width="4"/><path d="M175 110H185L189 115L180 120L171 115Z" fill="#fff4dd"/>';
- [[45,164,.48],[315,164,.48],[80,103,.36],[280,103,.36],[180,81,.29]].forEach((p,i)=>a+=person(g.team[(i+1)%6],...p,0));
+ [[45,164,.48],[315,164,.48],[80,103,.36],[280,103,.36],[180,81,.29]].forEach((p,i)=>a+=person(defensiveLineup()[i],...p,0));
  for(let i=0;i<3;i++)if(g.bases[i]!==null){const q=[[305,183,.48],[180,245,.76],[55,183,.48]][i];a+=person(g.bases[i],...q,1)}
- a+=person(currentBatter(),158,117,.65,1,'bat')+person(currentPitcher(),180,231,1.4,0,'pitch')+'<rect id="baseZone" x="169" y="83" width="24" height="31" rx="2" fill="none" stroke="#fff4ab" stroke-width="2" stroke-dasharray="4 3"/><g id="baseBall" opacity="0">'+ball(0,0,5)+'</g><text x="12" y="14" font-size="10" font-weight="900" fill="#fff9e7" stroke="#38543d" stroke-width="3" paint-order="stroke">ON THE MOUND</text>';
+ a+=person(currentBatter(),158,117,.65,1,'bat')+person(currentPitcher(),180,231,1.4,0,'pitch')+'<rect id="baseZone" x="162" y="81" width="38" height="34" rx="2" fill="none" stroke="#fff4ab" stroke-width="2" stroke-dasharray="4 3"/><g id="baseBall" opacity="0">'+ball(0,0,5)+'</g><text x="12" y="14" font-size="10" font-weight="900" fill="#fff9e7" stroke="#38543d" stroke-width="3" paint-order="stroke">ON THE MOUND</text>';
  return svg(a,'Pitching perspective from behind the mound toward the opposing batter')
 }
 const basesXY=[[294,146],[180,65],[66,146],[180,231]];
 function overhead(){const f=fields[field];let a='<rect width="360" height="260" fill="'+f[2]+'"/><path d="M0 45Q180 -18 360 45" fill="none" stroke="'+f[4]+'" stroke-width="18"/><path d="M180 232L57 143L180 55L303 143Z" fill="'+f[3]+'"/><path d="M180 210L87 143L180 80L273 143Z" fill="'+f[2]+'"/><path d="M180 232L0 102M180 232L360 102" stroke="#fff7df" stroke-width="2.3" fill="none"/><ellipse cx="180" cy="144" rx="23" ry="12" fill="'+f[3]+'"/>';
  for(let i=0;i<3;i++){const [x,y]=basesXY[i];a+='<path d="M'+x+' '+(y-6)+'l7 6l-7 6l-7 -6Z" fill="'+(g.bases[i]!==null?'#f8c34e':'#fff7df')+'" stroke="#875026" stroke-width="1.5"/>';if(g.bases[i]!==null)a+=person(g.bases[i],x,y-4,.52,g.half===1?0:1)}
  a+='<path d="M172 225H188L190 232L180 240L170 232Z" fill="#fff7df"/>';
- const def=g.half===1?g.cpu:g.team;
+ const def=defensiveLineup();
  fieldPos.forEach(([x,y],i)=>{a+='<g '+(g.phase==='field'?'data-base="fielder:'+i+'" role="button" style="cursor:pointer"':'')+'>'+person(def[i],x,y,.52,g.half===1?1:0)+(g.phase==='field'?'<circle cx="'+x+'" cy="'+(y-10)+'" r="15" fill="'+(g.fieldChosen&&g.fieldIndex===i?'#f8c34e33':'transparent')+'" stroke="'+(g.fieldChosen&&g.fieldIndex===i?'#f8c34e':'#fff4d880')+'" stroke-width="2"/>':'')+'</g>'});
  const hit=g.hit||{x:180,y:60},settled=g.phase==='result'||g.phase==='done'||g.phase==='run'||g.phase==='throw';a+='<path d="M180 222Q'+((180+hit.x)/2)+' '+(hit.y-45)+' '+hit.x+' '+hit.y+'" fill="none" stroke="#fff4d8" stroke-width="2" stroke-dasharray="4 4"/><g id="baseFlight" transform="translate('+(settled?hit.x:180)+' '+(settled?hit.y:222)+')">'+ball(0,0,4)+'</g>'+(settled?'':'<g id="baseRunner">'+person(currentBatter(),180,232,.5,g.half===1?0:1)+'</g>')+'<g id="baseChaser">'+person(def[g.half===0?g.fieldIndex:g.aim===0?0:g.aim===2?2:1],hit.x,Math.max(20,hit.y-40),.55,g.half===1?1:0)+'</g>';
  return svg(a,'Overhead diamond with runners, fielders and ball trajectory')
 }
 function currentBatter(){return (g.half===1?g.team:g.cpu)[g.order[g.half]%(g.half===1?g.team.length:g.cpu.length)]}
 function currentPitcher(){return g.half===1?g.cpu[0]:g.pitcher}
+function defensiveLineup(){const team=g.half===1?g.cpu:g.team,pitcher=currentPitcher();return [...team.filter(id=>id!==pitcher),pitcher]}
 function portrait(i){return '<svg viewBox="-35 -76 70 83" role="img" aria-label="'+esc(roster[i][0])+'">'+person(i,0,0,1,0)+'</svg>'}
 function lobby(){
  let out=btn('exit','← Arcade','link')+head('Bugyard Baseball','Summer. Sandlots. Suspiciously competitive bugs.')+'<div class="base-title-art"><svg viewBox="0 0 360 140">'+horizon(field).replace('height="260"','height="260"')+'<path d="M0 140L180 92L360 140Z" fill="'+fields[field][3]+'"/>'+person(1,68,138,1.05)+person(0,180,139,1.65,0,'bat')+person(4,293,138,1.2,1,'pitch')+'</svg><div><small>THE BUGYARD LEAGUE · v24</small><strong>BUGYARD BASEBALL</strong></div></div><div class="base-tabs">'+btn('mode:pickup','Pickup Game',mode==='pickup'?'primary':'secondary')+btn('mode:derby','Home Run Derby',mode==='derby'?'primary':'secondary')+'</div><div class="panel"><strong>Choose a field</strong><div class="base-fields">'+fields.map((f,i)=>btn('field:'+i,esc(f[0]),field===i?'primary':'secondary')).join('')+'</div></div>';
@@ -85,7 +86,7 @@ function view(){if(!g)return lobby();let bat=g.half===1,over=['flight','field','
   out+=btn('pitch',bat?'Ready for pitch':'Wind up','primary base-action');
  }else if(g.phase==='release')out+=btn('release','RELEASE PITCH!','primary base-action');
  else if(g.phase==='pitch')out+=bat?'<div class="base-controls"><small>ADJUST YOUR SWING SPOT</small>'+spotButtons()+'</div><div class="base-three">'+btn('swing','SWING!','primary base-action',g.swung||g.taken)+btn('take','Take pitch','secondary base-action',g.swung||g.taken)+'</div>':'<div class="panel">Pitch on its way…</div>';
- else if(g.phase==='field')out+='<div class="base-controls"><small>SELECT A FIELDER · TAP THE FIELD OR CHOOSE BELOW</small><div class="base-fielders">'+g.team.map((id,i)=>btn('fielder:'+i,esc(roster[id][0])+' · '+['LF','CF','RF','3B','1B','P'][i],i===g.fieldIndex&&g.fieldChosen?'primary':'secondary')).join('')+'</div></div>'+btn('fieldtap',g.fly?'CATCH IT!':'FIELD THE BALL!','primary base-action');
+ else if(g.phase==='field')out+='<div class="base-controls"><small>SELECT A FIELDER · TAP THE FIELD OR CHOOSE BELOW</small><div class="base-fielders">'+defensiveLineup().map((id,i)=>btn('fielder:'+i,esc(roster[id][0])+' · '+['LF','CF','RF','3B','1B','P'][i],i===g.fieldIndex&&g.fieldChosen?'primary':'secondary')).join('')+'</div></div>'+btn('fieldtap',g.fly?'CATCH IT!':'FIELD THE BALL!','primary base-action');
  else if(g.phase==='throw')out+='<div class="base-controls"><small>THROW TO A BASE · CHOOSE THE FORCE OUT</small><div class="base-four">'+['1B','2B','3B','HOME'].map((n,i)=>btn('throw:'+i,n,'secondary')).join('')+'</div></div>';
  else if(g.phase==='run')out+='<div class="base-controls"><strong>Run the bases</strong><p class="muted">Your hitter has a '+g.pending+'. Stretch it for another base, or hold safely?</p><div class="base-three">'+btn('hold','Hold base','secondary')+btn('stretch','Go for it!','primary')+'</div><small>Extra-base chance depends on runner speed, hit quality and difficulty.</small></div>';
  else if(g.phase==='flight')out+='<div class="panel">Ball in play…</div>';
@@ -93,7 +94,7 @@ function view(){if(!g)return lobby();let bat=g.half===1,over=['flight','field','
  out+='<p class="muted base-help">Aim at the pitch, swing as it crosses the plate. On defense, release accurately, select a fielder, then catch or throw to a forced base. Space = swing / release / field. P = pause.</p>';return out
 }
 function spotButtons(){return '<div class="base-spot-buttons">'+spots.map((_,i)=>btn('spot:'+i,['↖','↑','↗','←','●','→','↙','↓','↘'][i],g.spot===i?'primary':'secondary')).join('')+'</div>'}
-function aimOverlay(){const bat=g.half===1,x=bat?180:181,y=bat?204:98,z=bat?1:.7;return '<div class="base-aim-overlay" style="left:'+x/360*100+'%;top:'+y/260*100+'%;width:'+54*z/360*100+'%;height:'+48*z/260*100+'%">'+spots.map((_,i)=>'<button aria-label="Aim '+(i+1)+'" class="'+(g.spot===i?'selected':'')+'" data-base="spot:'+i+'"></button>').join('')+'</div>'}
+function aimOverlay(){const bat=g.half===1,x=bat?180:180,y=bat?204:98,z=bat?1:.7;return '<div class="base-aim-overlay" style="left:'+x/360*100+'%;top:'+y/260*100+'%;width:'+54*z/360*100+'%;height:'+48*z/260*100+'%">'+spots.map((_,i)=>'<button aria-label="Aim '+(i+1)+'" class="'+(g.spot===i?'selected':'')+'" data-base="spot:'+i+'"></button>').join('')+'</div>'}
 function start(){stop();const team=mode==='derby'?[hitter]:selected.slice();if(mode==='pickup'&&team.length!==6)return;const cpu=roster.map((_,i)=>i).filter(i=>!team.includes(i)).slice(0,6);
  g={team,cpu,half:1,inning:1,scheduled:innings,level:difficulty,pitcher:team[0],energy:Object.fromEntries(team.map(id=>[id,100])),spot:4,fieldIndex:5,score:[0,0],order:[0,0],balls:0,strikes:0,outs:0,bases:[null,null,null],style:0,aim:1,phase:'ready',line:mode==='derby'?'Ten pitches. Swing for the fences.':'Play ball! The Crumb Squad bats first.',time:0,paused:false,swung:false,hit:null,hits:0,hr:0,attempts:0,reward:0,xp:0,end:false};render()
 }
@@ -124,7 +125,7 @@ function applyOutcome(kind){const id=currentBatter();g.lastBatter=id;let n=0,lin
  else if(kind==='ball'){g.balls++;line='Ball '+g.balls+'.';if(g.balls>=4){n=walk(id);plateComplete();line='Ball four! Take your base.'}}
  else if(kind==='strike')line=strike();
  else if(kind==='foul'){if(g.strikes<2)g.strikes++;line='Foul ball!'}
- else if(kind==='out'){if(g.half===0&&Number.isInteger(g.force)&&g.force>0){const idx=g.force-1;for(let j=idx;j>0;j--)g.bases[j]=g.bases[j-1];g.bases[0]=id;}g.force=null;g.outs++;plateComplete();line='OUT! Nice fielding.'}
+ else if(kind==='out'){if(g.half===0&&Number.isInteger(g.force)&&g.force>0){const idx=g.force-1,old=g.bases.slice();let chain=0;while(chain<3&&old[chain]!==null)chain++;for(let j=chain-1;j>=0;j--){g.bases[j]=null;if(j===idx)continue;if(j+1<3)g.bases[j+1]=old[j];else if(g.outs<2)n++}g.bases[0]=id;g.score[g.half]+=n;}const force=g.force;g.force=null;g.outs++;plateComplete();line=Number.isInteger(force)?'Force out at '+['first','second','third','home'][force]+'!':'OUT! Nice fielding.'}
  else{const b={single:1,double:2,triple:3,homer:4}[kind];n=advance(b,id);if(g.half===1){g.hits++;if(b===4)g.hr++}plateComplete();line=b===4?'HOME RUN!':b===3?'Triple!':b===2?'Double!':'Base hit!'}
  g.line=line+(n?' '+n+' run'+(n===1?'':'s')+' score!':'');g.phase='result';stop();render()
 }
@@ -150,14 +151,14 @@ function cpuResolve(){
 }
 function chooseFielder(i){if(!g||g.phase!=='field'||!Number.isInteger(i)||i<0||i>=6)return;if(g.fieldChosen&&g.fieldIndex===i)return;g.fieldIndex=i;g.fieldChosen=true;g.fieldStart=g.time;render();draw()}
 function fieldTap(){if(!g||g.paused||g.phase!=='field')return;
- const id=g.team[g.fieldIndex],r=roster[id],pos=fieldPos[g.fieldIndex],dist=Math.hypot(g.hit.x-pos[0],g.hit.y-pos[1]),reach=(g.time-g.fieldStart)*(57+r[4]*17)+18,err=Math.abs(g.time/g.duration-.76),window=(g.level==='rookie'?.18:g.level==='classic'?.115:.085)+r[6]*.011;
+ const id=defensiveLineup()[g.fieldIndex],r=roster[id],pos=fieldPos[g.fieldIndex],dist=Math.hypot(g.hit.x-pos[0],g.hit.y-pos[1]),reach=(g.time-g.fieldStart)*(57+r[4]*17)+18,err=Math.abs(g.time/g.duration-.76),window=(g.level==='rookie'?.18:g.level==='classic'?.115:.085)+r[6]*.011;
  if(!g.fieldChosen||dist>reach||err>window||Math.random()<Math.max(0,.07-r[6]*.012)){g.line='MISPLAY! The runners advance.';timer('flight',.45);return}
  if(g.fly){g.line='Caught it!';g.pending='out';timer('flight',.48);return}
  g.line='Ball secured! Choose a force out.';timer('throw',1.25)
 }
 function throwBase(i){if(!g||g.paused||g.phase!=='throw'||!Number.isInteger(i)||i<0||i>3)return;
  const forced=i===0||i===1&&g.bases[0]!==null||i===2&&g.bases[0]!==null&&g.bases[1]!==null||i===3&&g.bases.every(x=>x!==null);
- const id=g.team[g.fieldIndex],rating=roster[id][6],runner=i===0?currentBatter():g.bases[i-1],speed=roster[runner??currentBatter()][4],pos=basesXY[i],dist=Math.hypot(g.hit.x-pos[0],g.hit.y-pos[1]),err=Math.abs(g.time/g.duration-.55);
+ const id=defensiveLineup()[g.fieldIndex],rating=roster[id][6],runner=i===0?currentBatter():g.bases[i-1],speed=roster[runner??currentBatter()][4],pos=basesXY[i],dist=Math.hypot(g.hit.x-pos[0],g.hit.y-pos[1]),err=Math.abs(g.time/g.duration-.55);
  const limit=.40+rating*.045-speed*.027-dist*.0011-(g.level==='allstar'?.04:0);
  if(forced&&err<=Math.max(.09,limit)){g.line='Force out!';g.force=i;g.pending='out'}else{g.line=forced?'Safe! The throw was late.':'No force at that base!';g.force=null}
  timer('flight',.5)
@@ -174,7 +175,7 @@ function next(){if(!g||g.phase!=='result')return;if(g.end){finish();return}if(mo
 function finish(){if(!g||g.phase==='done')return;stop();g.phase='done';if(mode==='derby'){g.reward=10+12*g.hr+2*g.hits;g.xp=3+g.hr;stats.derbies++;stats.best=Math.max(stats.best,g.hr)}else{g.reward=35+12*g.score[1]+(g.score[1]>g.score[0]?60:g.score[1]===g.score[0]?30:0);g.xp=5+g.hits;stats.games++;stats.wins+=g.score[1]>g.score[0]?1:0;stats.runs+=g.score[1]}stats.hits+=g.hits;stats.hr+=g.hr;try{localStorage.setItem(KEY,JSON.stringify(stats))}catch(e){}s.crumbs+=g.reward;s.xp+=g.xp;save();render()}
 function draw(){if(!g)return;const u=clamp(g.time/(g.duration||1),0,1),cursor=el('baseCursor'),target=el('baseTarget');if(cursor)cursor.style.left=(u*100)+'%';if(target){const mid=g.phase==='field'?.76:g.phase==='release'?.72:g.phase==='throw'?.55:g.ideal||.87;const span=g.phase==='field'?.11:g.phase==='release'?.085:g.phase==='throw'?.15:levels[g.level].timing;target.style.left=((mid-span)*100)+'%';target.style.width=(span*200)+'%'}
  if(g.phase==='pitch'){const b=el('baseBall');if(b){let f=u/(g.ideal||.87),curve=g.pitchStyle===1?-25:g.pitchStyle===3?25:0;let x=180+g.pitchX*f+Math.sin(Math.min(f,1)*Math.PI)*curve,y=(g.half===1?135+(204+g.pitchY-135)*f:202+(98+g.pitchY*.7-202)*f);b.setAttribute('opacity','1');b.setAttribute('transform','translate('+x+' '+y+') scale('+(g.half===1?.45+u*.8:1.25-u*.8)+')')}}
- if((g.phase==='flight'||g.phase==='field'||g.phase==='throw')&&g.hit){let x=180+(g.hit.x-180)*u,y=222+(g.hit.y-222)*u-Math.sin(Math.PI*u)*35;el('baseFlight')?.setAttribute('transform','translate('+x+' '+y+')');el('baseRunner')?.setAttribute('transform','translate('+(114*u)+' '+(-86*u)+')');if(g.phase==='field'&&g.fieldChosen){const pos=fieldPos[g.fieldIndex],r=roster[g.team[g.fieldIndex]],distance=Math.hypot(g.hit.x-pos[0],g.hit.y-pos[1])||1,f=clamp((g.time-g.fieldStart)*(57+r[4]*17)/distance,0,1);el('baseChaser')?.setAttribute('transform','translate('+(pos[0]+(g.hit.x-pos[0])*f-g.hit.x)+' '+(pos[1]+(g.hit.y-pos[1])*f-g.hit.y+40)+')')}else el('baseChaser')?.setAttribute('transform','translate(0 '+(40*u)+')')}}
+ if((g.phase==='flight'||g.phase==='field'||g.phase==='throw')&&g.hit){let t=g.phase==='throw'?1:u,x=180+(g.hit.x-180)*t,y=222+(g.hit.y-222)*t-Math.sin(Math.PI*t)*35;el('baseFlight')?.setAttribute('transform','translate('+x+' '+y+')');el('baseRunner')?.setAttribute('transform','translate('+(114*u)+' '+(-86*u)+')');if(g.phase==='field'&&g.fieldChosen){const pos=fieldPos[g.fieldIndex],r=roster[defensiveLineup()[g.fieldIndex]],distance=Math.hypot(g.hit.x-pos[0],g.hit.y-pos[1])||1,f=clamp((g.time-g.fieldStart)*(57+r[4]*17)/distance,0,1);el('baseChaser')?.setAttribute('transform','translate('+(pos[0]+(g.hit.x-pos[0])*f-g.hit.x)+' '+(pos[1]+(g.hit.y-pos[1])*f-g.hit.y+40)+')')}else el('baseChaser')?.setAttribute('transform','translate(0 '+(g.phase==='throw'?40:40*u)+')')}}
 function frame(now){raf=0;if(!active()||!g||g.paused)return;let dt=last?Math.min(.06,(now-last)/1000):0;last=now;g.time+=dt;draw();if(g.phase==='release'&&g.time>=g.duration){launchPitch(.4);return}if(g.phase==='pitch'){
  if(g.swung&&g.time>=g.swingAt+.18){let r=g.pendingSwing;g.pendingSwing=null;if(r==='strike'||r==='foul')applyOutcome(r);else hitFlight(r);return}
  if(!g.swung&&g.time>=g.duration){if(g.half===0)cpuResolve();else applyOutcome(g.pitchStrike?'strike':'ball');return}}
