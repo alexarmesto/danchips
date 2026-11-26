@@ -49,7 +49,7 @@ const bubble=(who,line)=>'<div class="baby-bubble"><small>'+esc(who)+'</small><p
 function bathroomHotspots(){return '<div class="baby-hotspots">'+button('beer','🍺','baby-hot beer-hot')+button('hot','HOT','baby-hot hot-hot')+button('cold','COLD','baby-hot cold-hot')+button('inspect','🔎 Baby','baby-hot inspect-hot')+'</div>'}
 function frame(art,title,body,cls=''){return '<section class="baby-scene '+cls+'"><div class="baby-screen"><div class="baby-vhs"><span>● REC</span><span>CASE 001 / '+esc(title)+'</span><span>'+String(g?.hour||0).padStart(2,'0')+':00:00</span></div>'+art+(g?.phase==='wake'?bathroomHotspots():'')+'<div class="baby-scan"></div></div>'+body+'</section>'}
 function meter(label,num,max=100){return '<div class="baby-meter"><div class="split"><small>'+label+'</small><span>'+num+(max===100?'%':'')+'</span></div><div class="baby-track"><i style="width:'+Math.min(100,num/max*100)+'%"></i></div></div>'}
-const top=()=>'<div class="baby-top">'+button('exit','← Arcade','link')+'<span>CASE #001 · v19</span>'+button('mute',p.mute?'🔇':'🔊','baby-audio')+'</div>';
+const top=()=>'<div class="baby-top">'+button('exit','← Arcade','link')+'<span>CASE #001 · v20</span>'+button('mute',p.mute?'🔇':'🔊','baby-audio')+'</div>';
 function start(){stop();p.visits++;persist();g={phase:'wake',hour:0,incident:false,bladder:65,guilt:0,size:1+Math.log1p(p.visits-1)*.15,water:'',line:quotes[0],lies:0,dumps:0,day:0,q:0,step:0};flash='';audio();music('party')}
 function complete(b){if(!p.done.includes(b)){p.done.push(b);persist()}}
 function beginTrial(){stop();g.phase='trial';g.q=0;g.line="Did you or did you not urinate on the deceased?";g.reply="He wasn't deceased at the time.";music('court')}
