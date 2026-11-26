@@ -140,16 +140,63 @@ function comicExplore(c){let i=r.i,office=r.location==='office',spots=places[i],
 function comicTrial(c){const i=r.i,cap=comicCaption('03','CROSS-EXAMINATION',(r.q+1)+'/'+c[7].length);if(r.reaction){const ok=r.reaction.ok;return cap+cinematicStage(i,'trial',ok?'OBJECTION SUSTAINED':'Objection overruled')+speechPanel(i,ok?'dan':'judge',ok?'Attorney Dan':'Judge Crisp',ok?r.reaction.line:'That exhibit does not contradict this statement. The court requires a more precise objection.','reaction',ok?'Next panel →':'Return to testimony →')}return cap+'<div class="comic-witness-wrap">'+cinematicStage(i,'trial','')+'<button class="comic-talk-target" data-court="press" aria-label="Talk to the witness">💬 TALK</button></div>'+speechPanel(i,r.pressed?'dan':'witness',r.pressed?'Attorney Dan':c[4],r.pressed?'Compare their statement to the exact facts in your evidence satchel.':c[7][r.q],r.pressed?'unpress':'press',r.pressed?'Back to testimony':'Press witness')+'<div class="comic-testimony"><small>WITNESS STATEMENT '+(r.q+1)+'</small><p>“'+esc(c[7][r.q])+'”</p></div><div class="comic-inventory"><div class="split"><strong>Present an exhibit</strong><span>OBJECTION!</span></div>'+evidenceGrid(c)+'</div>'+evidenceViewer(c)}
 function comicArgument(c){return comicCaption('04','THE CLOSING ARGUMENT')+cinematicStage(r.i,'argument','')+speechPanel(r.i,'dan','Attorney Dan','Your Honor, the facts are before us. Allow me to conclude.')+c[8].map((v,i)=>'<button class="comic-choice" data-court="close:'+i+'"><span>'+String.fromCharCode(65+i)+'</span>'+esc(v)+'</button>').join('')+(r.feedback?'<p class="comic-instruction">'+esc(r.feedback)+'</p>':'')}
 
+
+/* One illustrated stage is the interface: speech, props and actions are all children of the scene. */
+function worldBubble(who,name,line,action,label,extra=''){
+return '<div class="world-bubble world-'+who+'"><small>'+esc(name)+'</small><p>'+esc(line)+'</p>'+extra+(action?button(action,label||'Continue →','world-action'):'')+'</div>'
+}
+function worldFrame(art,phase,body,overlay='',effect=''){
+return '<section class="world-scene world-phase-'+phase+'"><div class="world-art">'+art+effect+'</div>'+body+overlay+'<div class="world-hud"><small>'+(phase==='explore'?'Evidence '+r.found.length+'/3':'Credibility')+'</small><span aria-label="'+r.hp+' of 3 credibility">'+('♥'.repeat(r.hp)+'♡'.repeat(3-r.hp))+'</span><small>CASE '+String(r.i+1).padStart(2,'0')+'</small></div></section>'
+}
+function worldCourt(i){
+const room=cinematicRoom(i,'client').replace(/<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+/* Reuse the established courtroom architecture but stage all three actors together. */
+const end=room.indexOf('<g class="comic-idle dan-idle">');
+const bg=end>=0?room.slice(0,end):room;
+const desk=(x,y,w,name)=>'<g stroke="#875026" stroke-width="3"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(300-y)+'" rx="5" fill="#c68b52"/><rect x="'+(x-4)+'" y="'+(y-6)+'" width="'+(w+8)+'" height="12" rx="4" fill="#e0af74"/><rect x="'+(x+8)+'" y="'+(y+15)+'" width="'+(w-16)+'" height="24" rx="4" fill="#b97b43" stroke="#eac48a"/><text x="'+(x+w/2)+'" y="'+(y+31)+'" text-anchor="middle" font-size="11" fill="#fff8e9" stroke="none" font-weight="900">'+name+'</text></g>';
+return svg(480,300,bg+'<g class="comic-idle">'+bugFace(i,'judge',240,98,.60)+'</g>'+desk(184,147,112,'JUDGE CRISP')+'<g class="comic-idle dan-idle">'+cinemaDan(-10,118,225,156)+'</g><g class="comic-idle client-idle">'+bugFace(i,'witness',376,173,.94)+'</g>'+desk(10,238,211,'ATTORNEY DAN')+desk(302,238,168,'WITNESS')+'<path d="M444 231V209Q444 201 435 201" stroke="#304c65" stroke-width="3" fill="none"/><ellipse cx="432" cy="200" rx="7" ry="4" fill="#304c65"/>','Dan, Judge Crisp and the witness in court','cinema-art')
+}
+function worldExhibits(c,explore=false){
+return '<div class="world-evidence-desk"><div class="world-desk-label">'+(explore?'EVIDENCE SATCHEL':'EVIDENCE TABLE · TAP AN OBJECT')+'</div><div class="world-props">'+r.order.map((j,k)=>{let found=r.found.includes(j),active=r.inspect===j;return found?'<button class="world-prop '+(active?'selected':'')+'" data-court="inspect:'+j+'" aria-label="Inspect exhibit '+String.fromCharCode(65+k)+': '+esc(c[6][j].split('|')[0])+'"><span class="world-prop-letter">'+String.fromCharCode(65+k)+'</span>'+sceneProp(r.i,j)+'<span>'+esc(c[6][j].split('|')[0])+'</span></button>':'<div class="world-prop world-empty"><span>?</span><small>Undiscovered</small></div>'}).join('')+'</div></div>'
+}
+function worldInspect(c){
+if(r.inspect===null||r.inspect===undefined)return '';
+const j=r.inspect,[name,body]=c[6][j].split('|'),letter=String.fromCharCode(65+r.order.indexOf(j));
+return '<div class="world-inspect '+(r.arrival?'world-arrival':'')+'" role="dialog" aria-label="Exhibit '+letter+'"><div class="world-inspect-object"><button class="world-close" data-court="inspectclose" aria-label="Return to scene">✕</button><small>EXHIBIT '+letter+'</small>'+evidenceArt(r.i,j)+'<strong>'+esc(name)+'</strong><div class="world-evidence-caption">'+esc(body)+'</div><div class="world-inspect-actions">'+(r.phase==='trial'?button('object:'+j,'OBJECTION!','world-objection')+button('inspectclose','Put back','world-action subtle'):button('inspectclose','Put in satchel →','world-action'))+'</div></div></div>'
+}
+function worldReaction(c){
+const ok=r.reaction.ok,who=ok?'dan':'judge';
+return worldFrame(cinematicRoom(r.i,who),'trial',worldBubble(who,ok?'Attorney Dan':'Judge Crisp',ok?r.reaction.line:'That exhibit does not contradict the witness. Try another.', 'reaction',ok?'Next testimony →':'Try again →'),'','<div class="world-impact"><div class="cinema-rays"></div><div class="court-stamp">'+(ok?'OBJECTION!':'OVERRULED!')+'</div>'+reactionArt(who,'trial',ok?'OBJECTION SUSTAINED':'Objection overruled')+'</div>')
+}
+function worldTrial(c){
+if(r.reaction)return worldReaction(c);
+const statement=c[7][r.q];
+const bubble=worldBubble('witness',c[4]+' · Statement '+(r.q+1),statement,r.pressed?'unpress':'press',r.pressed?'↩ Back to testimony':'PRESS WITNESS',r.pressed?'<div class="world-hint">Dan: Compare that with the facts on our evidence table.</div>':'');
+return worldFrame(worldCourt(r.i),'trial',bubble+worldExhibits(c),worldInspect(c),'<button class="world-talk" data-court="press" aria-label="Press the witness">💬 PRESS</button>'+reactionArt('witness','trial',''))
+}
+function worldInterview(c){
+const i=r.i,lines=[['client',c[2],quips[i][0]],['dan','Attorney Dan',quips[i][1]],['client',c[2],c[3]],['dan','Attorney Dan','I like chips. I also like justice. Let us find the evidence.']],line=lines[r.talk],angle=r.talk===0?'client':r.talk===2?'clientclose':'dan';
+return worldFrame(cinematicRoom(i,angle),'intro',worldBubble(line[0],line[1],line[2],r.talk<3?'talk':'evidence',r.talk<3?'Next panel →':'Investigate →'))
+}
+function worldExplore(c){
+let i=r.i,office=r.location==='office',spots=places[i],indices=office?[2]:[0,1];
+const art='<div class="comic-explore world-explore-map">'+comicBackdrop(i,office)+walkGround()+walkingDan()+indices.map(j=>sceneObject(i,j,office?73:spots[j][0],office?68:spots[j][1])).join('')+'<button class="scene-ambient" data-court="ambient" style="left:'+(office?30:51)+'%;top:'+(office?32:47)+'%" aria-label="Inspect surroundings">⋯</button><button class="world-travel" data-court="location:'+(office?'scene':'office')+'">'+(office?'← Accident scene':'Dan’s office →')+'</button></div>';
+return worldFrame(art,'explore',worldBubble('dan','Attorney Dan',r.exploreLine||'Tap the objects in the scene to gather evidence.',r.found.length===3?'trial':null,'Enter court →')+worldExhibits(c,true),worldInspect(c))
+}
+function worldArgument(c){
+return worldFrame(cinematicRoom(r.i,'dan'),'argument',worldBubble('dan','Attorney Dan',r.feedback||'Your Honor, the facts are before us. Allow me to conclude.')+'<div class="world-arguments">'+c[8].map((v,i)=>button('close:'+i,esc(v),'world-choice')).join('')+'</div>')
+}
+function worldVerdict(c,last){
+const won=r.phase==='won',line=won?c[10]:'The judge requests better evidence. Even a great beetle can regroup.';
+let extra=won?'<div class="world-reward">'+(r.first?(last?'+50 crumbs · +15 XP':'+12 crumbs · +5 XP'):'Replay complete')+' · '+(r.hp===3?'S':r.hp===2?'A':'B')+' rank'+(r.unlock?' · New cosmetic: '+esc(r.unlock):'')+'</div>':'<div class="world-hint">'+esc(r.feedback)+'</div>';
+return worldFrame(won?cinematicRoom(r.i,'dan'):cinematicRoom(r.i,'judge'),won?'won':'lost',worldBubble(won?'dan':'judge',won?'CASE WON!':'CASE LOST',line,won?'docket':'retry',won?'Return to docket →':'Retry case →',extra)+(won?'':button('docket','Return to docket','world-action subtle')),'','<div class="world-impact"><div class="court-stamp '+(won?'victory':'')+'">'+(won?'CASE WON!':'CASE LOST')+'</div>'+reactionArt(won?'dan':'judge',r.phase,'')+'</div>')
+}
+
 function courtroom(){
 const c=cases[r.i],last=r.i===cases.length-1;
-let out=button('docket','← Case docket','link')+'<div class="comic-case-title"><small>'+esc(c[0])+' · CASE '+String(r.i+1).padStart(2,'0')+'</small><h2>'+esc(c[1])+'</h2><div class="court-progress">'+['Client','Explore','Trial','Argument','Verdict'].map((v,i)=>'<span class="'+(i===({intro:0,evidence:1,trial:2,argument:3,won:4,lost:4})[r.phase]?'active':'')+'">'+(i+1)+' · '+v+'</span>').join('')+'</div></div>';
-if(r.phase==='intro')return out+comicInterview(c);
-if(r.phase==='evidence')return out+comicExplore(c);
-if(r.phase==='trial')return out+comicTrial(c);
-if(r.phase==='argument')return out+comicArgument(c);
-out+=comicCaption('05','THE VERDICT')+cinematicStage(r.i,r.phase,r.feedback);
-if(r.phase==='won')return out+card('<div class="comic-victory" style="text-align:center"><div class="victory-dan">'+svg(480,220,cinemaDan(95,-10,290,230),'Dan celebrates')+'</div><div style="font-size:42px">🏆</div><h2>VERDICT: CASE WON!</h2><p>'+esc(c[10])+'</p><strong>'+(r.hp===3?'S · Immaculate Crunch':r.hp===2?'A · Excellent Counsel':'B · Justice Prevails')+'</strong><p class="muted">'+(r.first?(last?'+50 crumbs · +15 XP':'+12 crumbs · +5 XP'):'Replay complete · First-win reward already collected')+'</p>'+(r.unlock?'<p class="quote">New cosmetic: '+esc(r.unlock)+'</p>':'')+'</div>')+button('docket','Return to case docket');
-return out+card('<h2>CASE LOST</h2><p>The judge requests better evidence. Even a great beetle can regroup.</p><p>'+esc(r.feedback)+'</p>')+button('retry','Retry case')+'<div style="margin-top:8px">'+button('docket','Return to case docket','secondary')+'</div>'
+const phase=({intro:'Client',evidence:'Investigate',trial:'Trial',argument:'Argument',won:'Verdict',lost:'Verdict'})[r.phase];
+let out='<div class="world-top">'+button('docket','← Docket','link')+'<small> '+esc(phase)+' '+(r.phase==='trial'?(r.q+1)+'/'+c[7].length:r.phase==='intro'?(r.talk+1)+'/4':'')+'</small><small>v15</small></div><div class="world-title"><small>'+esc(c[0])+'</small><h2>'+esc(c[1])+'</h2></div>';
+return out+(r.phase==='intro'?worldInterview(c):r.phase==='evidence'?worldExplore(c):r.phase==='trial'?worldTrial(c):r.phase==='argument'?worldArgument(c):worldVerdict(c,last))
 }
 function start(i){if(!Number.isInteger(i)||i<0||i>=cases.length||!open(i))return;const order=[0,1,2];for(let j=2;j>0;j--){const k=Math.floor(Math.random()*(j+1));[order[j],order[k]]=[order[k],order[j]]}r={i,phase:'intro',q:0,hp:3,feedback:'',pressed:false,first:false,unlock:'',inspect:null,order,talk:0,location:'scene',found:[],exploreLine:'',reaction:null,position:[16,84],walkFrom:[16,84],arrival:false};mode='court';window.scrollTo(0,0)}
 function miss(msg){r.hp--;r.feedback=msg;if(r.hp===0)r.phase='lost'}
